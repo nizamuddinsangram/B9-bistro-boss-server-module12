@@ -88,7 +88,7 @@ async function run() {
     //find admin
     app.get("/users/admin/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
-      console.log("find admin route", req.user.email);
+      // console.log("find admin route", req.user.email);
       if (req.user.email !== email) {
         return res.status(403).send({ message: "forbidden" });
       }
@@ -133,6 +133,37 @@ async function run() {
     // Send a ping to confirm a successful connection
     app.get("/menu", async (req, res) => {
       const result = await menuCollection.find().toArray();
+      res.send(result);
+    });
+    //add a menu by admin
+    app.post("/menu", verifyToken, verifyAdminToken, async (req, res) => {
+      const addItem = req.body;
+      const result = await menuCollection.insertOne(addItem);
+      res.send(result);
+    });
+    app.delete("/menu/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: id };
+      const result = await menuCollection.deleteOne(query);
+      res.send(result);
+    });
+    app.get("/menu/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: id };
+      const result = await menuCollection.findOne(query);
+      res.send(result);
+    });
+    // patch a menu by admin
+    app.patch("/menu/:id", async (req, res) => {
+      const id = req.params.id;
+      const item = req.body;
+      const query = { _id: id };
+      const updateDoc = {
+        $set: {
+          ...item,
+        },
+      };
+      const result = await menuCollection.updateOne(query, updateDoc);
       res.send(result);
     });
     app.get("/reviews", async (req, res) => {
